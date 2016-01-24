@@ -19,47 +19,16 @@ class PageGetter:
         return Page(self.url, content)
 
 
-class LinkExtractor:
+class LinkValidator:
 
-    def __init__(self):
-        self._links = []
-        self._content = ""
-
-    def extract_links_from_page(self, page: Page):
-        self._content = page.content
-        self._extract_all_links()
-        self._remove_broken_links()
-        return self._links
-
-    def _extract_all_links(self):
-        unextracted_links = self._get_broken_down_content()
-        for unextracted_link in unextracted_links:
-            self._extract_link(unextracted_link)
-
-    def _get_broken_down_content(self):
-        link_prefix = "<a "
-        broken_down_content = self._content.split(link_prefix)
-        return broken_down_content
-
-    def _extract_link(self, content):
-        link = self._find_link_in_content(content)
-        self._links.append(link)
-
-    def _find_link_in_content(self, content):
-        link_prefix = 'href="'
-        start_of_link = content.find(link_prefix) + len(link_prefix)
-        end_of_link = content[start_of_link:].find('"') + start_of_link
-        link = content[start_of_link:end_of_link]
-        return link
-
-    def _remove_broken_links(self):
-        links = []
-        for link in self._links:
+    def remove_broken_links(self, unvalidated_links):
+        working_links = []
+        for link in unvalidated_links:
             if self._link_is_valid(link):
-                links.append(link)
-        self._links = links
+                working_links.append(link)
 
-    # TODO create link validator class.
+        return working_links
+
     def _link_is_valid(self, link):
         if self._link_is_correct_length(link) and self._link_has_valid_country_code(link):
             return True
@@ -82,3 +51,38 @@ class LinkExtractor:
         country_code_position = link.rfind(".")
         if country_code_position > 1 and country_code_position < length_of_link:
             return True
+
+
+class LinkExtractor:
+
+    def __init__(self, link_validator: LinkValidator):
+        self._links = []
+        self._content = ""
+        self._link_validator = link_validator
+
+    def extract_links_from_page(self, page: Page):
+        self._content = page.content
+        self._extract_all_links()
+        links = self._link_validator.remove_broken_links(self._links)
+        return links
+
+    def _extract_all_links(self):
+        unextracted_links = self._get_broken_down_content()
+        for unextracted_link in unextracted_links:
+            self._extract_link(unextracted_link)
+
+    def _get_broken_down_content(self):
+        link_prefix = "<a "
+        broken_down_content = self._content.split(link_prefix)
+        return broken_down_content
+
+    def _extract_link(self, content):
+        link = self._find_link_in_content(content)
+        self._links.append(link)
+
+    def _find_link_in_content(self, content):
+        link_prefix = 'href="'
+        start_of_link = content.find(link_prefix) + len(link_prefix)
+        end_of_link = content[start_of_link:].find('"') + start_of_link
+        link = content[start_of_link:end_of_link]
+        return link

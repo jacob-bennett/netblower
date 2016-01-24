@@ -42,7 +42,7 @@ class TestPageGetter(unittest.TestCase):
 class TestLinkExtractor(unittest.TestCase):
 
     def test_extract_links_from_page(self):
-        extractor = LinkExtractor()
+        extractor = LinkExtractor(LinkValidator())
         link1 = "http://test.com"
         link2 = "http://netblower.nb"
         page_content = self._generate_test_html_page(link1, link2)
@@ -67,6 +67,22 @@ class TestLinkExtractor(unittest.TestCase):
         '</p>'
         % (link1, link2, empty_link, invalid_link_1, invalid_link_2)
     )
+
+
+class TestLinkValidator(unittest.TestCase):
+
+    def test_remove_broken_links(self):
+        link_validator = LinkValidator()
+        number_of_valid_links = 1
+        valid_link = "http://test.com"
+        empty_link = "http://"
+        broken_link_1 = "http://bleh."
+        broken_link_2 = "http://bleh"
+        links = [valid_link, empty_link, broken_link_1, broken_link_2]
+        returned_links = link_validator.remove_broken_links(links)
+
+        self.assertEqual(len(returned_links), number_of_valid_links)
+        self.assertEqual(returned_links[0], valid_link)
 
 
 if __name__ == '__main__':
