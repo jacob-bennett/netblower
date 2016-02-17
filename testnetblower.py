@@ -22,16 +22,6 @@ class TestPageGetter(unittest.TestCase):
         request_response.read.assert_called_once_with()
 
 
-class TestPage(unittest.TestCase):
-
-    def test_create(self):
-        url = 'test_url'
-        content = '<p>content</p>'
-        page = Page(url, content)
-        self.assertEqual(url, page.url)
-        self.assertEqual(content, page.content)
-
-
 class TestLinkExtractor(unittest.TestCase):
 
     def test_extract_links_from_page(self):
