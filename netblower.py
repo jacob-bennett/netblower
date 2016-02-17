@@ -1,22 +1,16 @@
 from urllib import request
 
 
+def get_page(url):
+    content = request.urlopen(url).read()
+    return Page(url, content)
+
+
 class Page:
 
     def __init__(self, url, content):
         self.url = url
         self.content = content
-
-
-class PageGetter:
-
-    def __init__(self, url, requester):
-        self.url = url
-        self.__requester = requester
-
-    def get_page(self):
-        content = self.__requester.urlopen(self.url).read()
-        return Page(self.url, content)
 
 
 class LinkValidator:

@@ -3,6 +3,25 @@ from unittest.mock import MagicMock
 from netblower import *
 
 
+class TestPageGetter(unittest.TestCase):
+
+    def setUp(self):
+        self._url = 'https://github.com/jacob-bennett/netblower'
+        self._example_html = "<html><body><p>test<a>link</a></p></body</html>"
+
+    def test_get_page(self):
+        request_response = MagicMock
+        request_response.read = MagicMock(return_value = self._example_html)
+        request.urlopen = MagicMock(return_value = request_response)
+
+        returned_page = get_page(self._url)
+
+        self.assertIsInstance(returned_page, Page)
+        self.assertEqual(self._example_html, returned_page.content)
+        request.urlopen.assert_called_once_with(self._url)
+        request_response.read.assert_called_once_with()
+
+
 class TestPage(unittest.TestCase):
 
     def test_create(self):
@@ -11,32 +30,6 @@ class TestPage(unittest.TestCase):
         page = Page(url, content)
         self.assertEqual(url, page.url)
         self.assertEqual(content, page.content)
-
-
-class TestPageGetter(unittest.TestCase):
-
-    def setUp(self):
-        self.url = 'https://github.com/jacob-bennett/netblower'
-
-    def test_create(self):
-        page_getter = PageGetter(self.url, MagicMock)
-        self.assertEqual(self.url, page_getter.url)
-
-    def test_get_page(self):
-        example_html = "<html><body><p>test<a>link</a></p></body</html>"
-
-        requester_response = MagicMock
-        requester_response.read = MagicMock(return_value = example_html)
-        requester = MagicMock(request)
-        requester.urlopen = MagicMock(return_value = requester_response)
-
-        page_getter = PageGetter(self.url, requester)
-        page = page_getter.get_page()
-
-        self.assertIsInstance(page, Page)
-        self.assertEqual(example_html, page.content)
-        requester.urlopen.assert_called_with(self.url)
-        requester_response.read.assert_called_once_with()
 
 
 class TestLinkExtractor(unittest.TestCase):
